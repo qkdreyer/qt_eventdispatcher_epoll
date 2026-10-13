@@ -62,7 +62,14 @@ bool EventDispatcherEPollPrivate::processEvents(QEventLoop::ProcessEventsFlags f
 	this->m_interrupt = false;
 	Q_EMIT q->awake();
 
+#if QT_VERSION >= 0x060000
+	// Qt 6 doesn't expose the posted events count anymore. It is not needed to decide whether we can wait:
+	// QCoreApplication::postEvent() always calls wakeUp(), so epoll_wait() returns as soon as an event is posted
+	// (that's also what the Qt 6 UNIX event dispatcher returns: true only for activated timers/notifiers).
+	bool result = false;
+#else
 	bool result = q->hasPendingEvents();
+#endif
 
 #if QT_VERSION < 0x040500
 	QCoreApplication::sendPostedEvents(0, (flags & QEventLoop::DeferredDeletion) ? -1 : 0);

@@ -13,14 +13,20 @@ public:
 	virtual ~EventDispatcherEPoll(void);
 
 	virtual bool processEvents(QEventLoop::ProcessEventsFlags flags);
+#if QT_VERSION < 0x060000
 	virtual bool hasPendingEvents(void);
+#endif
 
 	virtual void registerSocketNotifier(QSocketNotifier* notifier);
 	virtual void unregisterSocketNotifier(QSocketNotifier* notifier);
 
 	virtual void registerTimer(
 		int timerId,
+#if QT_VERSION >= 0x060000
+		qint64 interval,
+#else
 		int interval,
+#endif
 #if QT_VERSION >= 0x050000
 		Qt::TimerType timerType,
 #endif
@@ -36,7 +42,9 @@ public:
 
 	virtual void wakeUp(void);
 	virtual void interrupt(void);
+#if QT_VERSION < 0x060000
 	virtual void flush(void);
+#endif
 
 private:
 	Q_DISABLE_COPY(EventDispatcherEPoll)

@@ -1,4 +1,5 @@
 #include <QtCore/QPair>
+#include <climits>
 #include <QtCore/QSocketNotifier>
 #include <QtCore/QThread>
 #include "eventdispatcher_epoll.h"
@@ -23,11 +24,13 @@ bool EventDispatcherEPoll::processEvents(QEventLoop::ProcessEventsFlags flags)
 	return d->processEvents(flags);
 }
 
+#if QT_VERSION < 0x060000
 bool EventDispatcherEPoll::hasPendingEvents(void)
 {
 	extern uint qGlobalPostedEventsCount();
 	return qGlobalPostedEventsCount() > 0;
 }
+#endif
 
 void EventDispatcherEPoll::registerSocketNotifier(QSocketNotifier* notifier)
 {
@@ -67,13 +70,22 @@ void EventDispatcherEPoll::unregisterSocketNotifier(QSocketNotifier* notifier)
 
 void EventDispatcherEPoll::registerTimer(
 	int timerId,
+#if QT_VERSION >= 0x060000
+	qint64 interval64,
+#else
 	int interval,
+#endif
 #if QT_VERSION >= 0x050000
 	Qt::TimerType timerType,
 #endif
 	QObject* object
 )
 {
+#if QT_VERSION >= 0x060000
+	// The internal timers are int based (more than 24 days intervals are clamped)
+	const int interval = interval64 > INT_MAX ? INT_MAX : static_cast<int>(interval64);
+#endif
+
 #ifndef QT_NO_DEBUG
 	if (timerId < 1 || interval < 0 || !object) {
 		qWarning("%s: invalid arguments", Q_FUNC_INFO);
@@ -170,6 +182,8 @@ void EventDispatcherEPoll::interrupt(void)
 	this->wakeUp();
 }
 
+#if QT_VERSION < 0x060000
 void EventDispatcherEPoll::flush(void)
 {
 }
+#endif
