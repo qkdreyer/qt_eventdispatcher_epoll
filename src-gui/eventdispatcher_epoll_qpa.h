@@ -14,8 +14,10 @@ public:
 	virtual ~EventDispatcherEPollQPA(void);
 
 	bool processEvents(QEventLoop::ProcessEventsFlags flags) Q_DECL_OVERRIDE;
+#if QT_VERSION < 0x060000
 	bool hasPendingEvents(void) Q_DECL_OVERRIDE;
 	void flush(void) Q_DECL_OVERRIDE;
+#endif
 
 private:
 	Q_DISABLE_COPY(EventDispatcherEPollQPA)

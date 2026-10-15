@@ -63,9 +63,14 @@ bool EventDispatcherEPollPrivate::processEvents(QEventLoop::ProcessEventsFlags f
 	Q_EMIT q->awake();
 
 #if QT_VERSION >= 0x060000
-	// Qt 6 doesn't expose the posted events count anymore. It is not needed to decide whether we can wait:
-	// QCoreApplication::postEvent() always calls wakeUp(), so epoll_wait() returns as soon as an event is posted
-	// (that's also what the Qt 6 UNIX event dispatcher returns: true only for activated timers/notifiers).
+	// qGlobalPostedEventsCount() isn't exported since Qt 6.5, and we don't need it to decide whether we can wait,
+	// even though the Qt 6 UNIX event dispatcher checks threadData->canWaitLocked() before blocking:
+	// - QCoreApplication::postEvent() always calls wakeUp();
+	// - the CleanUp at the end of QCoreApplicationPrivate::sendPostedEvents() calls wakeUp() whenever events are
+	//   left in the queue (canWait is false);
+	// - the eventfd wakeup token is only consumed by epoll_wait(), after sendPostedEvents(), so it can't be lost.
+	// So epoll_wait() returns right away whenever posted events are pending. The return value only reports activated
+	// timers/notifiers, as the Qt 6 UNIX event dispatcher does.
 	bool result = false;
 #else
 	bool result = q->hasPendingEvents();

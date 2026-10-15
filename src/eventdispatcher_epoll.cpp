@@ -1,5 +1,5 @@
-#include <QtCore/QPair>
 #include <climits>
+#include <QtCore/QPair>
 #include <QtCore/QSocketNotifier>
 #include <QtCore/QThread>
 #include "eventdispatcher_epoll.h"

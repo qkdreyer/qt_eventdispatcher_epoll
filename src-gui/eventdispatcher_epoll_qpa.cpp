@@ -23,6 +23,7 @@ bool EventDispatcherEPollQPA::processEvents(QEventLoop::ProcessEventsFlags flags
 	return sent_events;
 }
 
+#if QT_VERSION < 0x060000
 bool EventDispatcherEPollQPA::hasPendingEvents(void)
 {
 	return EventDispatcherEPoll::hasPendingEvents() || QWindowSystemInterface::windowSystemEventsQueued();
@@ -34,3 +35,4 @@ void EventDispatcherEPollQPA::flush(void)
 		qApp->sendPostedEvents();
 	}
 }
+#endif

@@ -341,9 +341,9 @@ QList<QAbstractEventDispatcher::TimerInfo> EventDispatcherEPollPrivate::register
 		const ZeroTimer& data = zit.value();
 		if (object == data.object) {
 #if QT_VERSION < 0x050000
-			QAbstractEventDispatcher::TimerInfo ti(it.key(), 0);
+			QAbstractEventDispatcher::TimerInfo ti(zit.key(), 0);
 #else
-			QAbstractEventDispatcher::TimerInfo ti(it.key(), 0, Qt::PreciseTimer);
+			QAbstractEventDispatcher::TimerInfo ti(zit.key(), 0, Qt::PreciseTimer);
 #endif
 			res.append(ti);
 		}
